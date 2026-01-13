@@ -19,5 +19,20 @@ def list():
     cursor = conn.execute('SELECT name, score FROM lista ORDER BY score DESC LIMIT 10')
     return "|".join([f"{r[0]}:{r[1]}" for r in cursor.fetchall()])
 
+@app.route('/delete')
+def delete():
+    name = request.args.get('name')
+    conn = sqlite3.connect('puntos.db')
+    conn.execute('DELETE FROM lista WHERE name = ?', (name,))
+    conn.commit()
+    return "Borrado"
+
+@app.route('/clear')
+def clear():
+    conn = sqlite3.connect('puntos.db')
+    conn.execute('DELETE FROM lista')
+    conn.commit()
+    return "Lista Vacia"
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
