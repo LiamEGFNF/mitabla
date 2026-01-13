@@ -3,35 +3,45 @@ import sqlite3
 
 app = Flask(__name__)
 
+# Función para conectar con seguridad
+def get_db():
+    conn = sqlite3.connect('puntos.db')
+    conn.execute('CREATE TABLE IF NOT EXISTS lista (name TEXT, score INTEGER)')
+    return conn
+
 @app.route('/add')
 def add():
     name = request.args.get('name')
     score = request.args.get('score')
-    conn = sqlite3.connect('puntos.db')
-    conn.execute('CREATE TABLE IF NOT EXISTS lista (name TEXT, score INTEGER)')
+    conn = get_db()
     conn.execute('INSERT INTO lista (name, score) VALUES (?, ?)', (name, score))
     conn.commit()
+    conn.close()
     return "OK"
 
 @app.route('/list')
-def list():
-    conn = sqlite3.connect('puntos.db')
+def list_scores():
+    conn = get_db()
     cursor = conn.execute('SELECT name, score FROM lista ORDER BY score DESC LIMIT 10')
-    return "|".join([f"{r[0]}:{r[1]}" for r in cursor.fetchall()])
+    data = "|".join([f"{r[0]}:{r[1]}" for r in cursor.fetchall()])
+    conn.close()
+    return data if data else "Vacio"
 
 @app.route('/delete')
 def delete():
     name = request.args.get('name')
-    conn = sqlite3.connect('puntos.db')
+    conn = get_db()
     conn.execute('DELETE FROM lista WHERE name = ?', (name,))
     conn.commit()
+    conn.close()
     return "Borrado"
 
 @app.route('/clear')
 def clear():
-    conn = sqlite3.connect('puntos.db')
+    conn = get_db()
     conn.execute('DELETE FROM lista')
     conn.commit()
+    conn.close()
     return "Lista Vacia"
 
 if __name__ == '__main__':
