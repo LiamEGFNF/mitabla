@@ -3,7 +3,6 @@ import sqlite3
 
 app = Flask(__name__)
 
-# Función para conectar con seguridad
 def get_db():
     conn = sqlite3.connect('puntos.db')
     conn.execute('CREATE TABLE IF NOT EXISTS lista (name TEXT, score INTEGER)')
@@ -11,30 +10,25 @@ def get_db():
 
 @app.route('/add')
 def add():
+    # Buscamos el nombre y el puntaje separados por $ en la URL
     name = request.args.get('name')
     score = request.args.get('score')
-    conn = get_db()
-    conn.execute('INSERT INTO lista (name, score) VALUES (?, ?)', (name, score))
-    conn.commit()
-    conn.close()
-    return "OK"
+    
+    if name and score:
+        conn = get_db()
+        conn.execute('INSERT INTO lista (name, score) VALUES (?, ?)', (name, score))
+        conn.commit()
+        conn.close()
+        return "OK"
+    return "Error: Faltan datos"
 
 @app.route('/list')
 def list_scores():
     conn = get_db()
     cursor = conn.execute('SELECT name, score FROM lista ORDER BY score DESC LIMIT 10')
-    data = "|".join([f"{r[0]}:{r[1]}" for r in cursor.fetchall()])
+    lineas = [f"{r[0]}:{r[1]}" for r in cursor.fetchall()]
     conn.close()
-    return data if data else "Vacio"
-
-@app.route('/delete')
-def delete():
-    name = request.args.get('name')
-    conn = get_db()
-    conn.execute('DELETE FROM lista WHERE name = ?', (name,))
-    conn.commit()
-    conn.close()
-    return "Borrado"
+    return "|".join(lineas) if lineas else "Vacio"
 
 @app.route('/clear')
 def clear():
