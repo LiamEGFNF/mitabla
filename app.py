@@ -34,7 +34,7 @@ def add(nombre, puntos):
 @app.route('/list')
 def list_scores():
     conn = get_db()
-    cursor = conn.execute('SELECT name, score FROM lista ORDER BY score DESC LIMIT 10')
+    cursor = conn.execute('SELECT name, score FROM lista ORDER BY score DESC LIMIT 20')
     lineas = [f"{r[0]}:{r[1]}" for r in cursor.fetchall()]
     conn.close()
     return "|".join(lineas) if lineas else "Vacio"
