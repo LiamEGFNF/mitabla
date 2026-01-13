@@ -8,19 +8,14 @@ def get_db():
     conn.execute('CREATE TABLE IF NOT EXISTS lista (name TEXT, score INTEGER)')
     return conn
 
-@app.route('/add')
-def add():
-    # Buscamos el nombre y el puntaje separados por $ en la URL
-    name = request.args.get('name')
-    score = request.args.get('score')
-    
-    if name and score:
-        conn = get_db()
-        conn.execute('INSERT INTO lista (name, score) VALUES (?, ?)', (name, score))
-        conn.commit()
-        conn.close()
-        return "OK"
-    return "Error: Faltan datos"
+# Esta ruta usa barras / para que Clickteam no se confunda
+@app.route('/add/<nombre>/<puntos>')
+def add(nombre, puntos):
+    conn = get_db()
+    conn.execute('INSERT INTO lista (name, score) VALUES (?, ?)', (nombre, puntos))
+    conn.commit()
+    conn.close()
+    return "OK"
 
 @app.route('/list')
 def list_scores():
